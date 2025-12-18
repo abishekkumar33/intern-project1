@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Master | Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(120deg, #4e54c8, #8f94fb);
+            color: #fff;
+        }
+
+        /* Navbar */
+        .navbar {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid #fff;
+            background: transparent;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: #fff;
+            color: #4e54c8;
+        }
+
+        /* Register Card */
+        .register-container {
+            height: calc(100vh - 100px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-card {
+            background: #fff;
+            color: #333;
+            width: 400px;
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+
+        .register-card h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .register-card p {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4e54c8;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 25px;
+            border: none;
+            background: #4e54c8;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background: #3b40a4;
+        }
+
+        .extra {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .extra a {
+            color: #4e54c8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">Quiz Master</div>
+        <button class="back-btn" onclick="window.location.href='index.html'">Home</button>
+    </div>
+
+    <!-- Register Section -->
+    <div class="register-container">
+        <div class="register-card">
+            <h2>Create Account</h2>
+            <p>Join Quiz Master and start your learning journey</p>
+
+            <form>
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" placeholder="Create a password" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <input type="password" placeholder="Re-enter password" required>
+                </div>
+
+                <button type="submit" class="register-btn">Register</button>
+            </form>
+
+            <div class="extra">
+                Already have an account?
+                <a href="login.html">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2025 Quiz Master | Learn • Practice • Succeed
+    </div>
+
+</body>
+</html>
