@@ -52,6 +52,7 @@ def login():
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        print('In post method')
         role = request.form.get('role')
         name = request.form.get('name')
         email = request.form.get('email')
@@ -71,10 +72,13 @@ def register():
             flash('Email already registered', 'warning')
             return redirect(url_for('register'))
         
+        print('From frontend read')
         hashed_pw = generate_password_hash(password)
-        new_user = User(username = name, email = email,password_hash = hashed_pw)
+        new_user= User(username = name, email = email, password_hash = hashed_pw)
+        print(new_user)
         db.session.add(new_user)
         db.session.commit()
+
 
         role_obj = Role.query.filter_by(name = role).first()
         if not role_obj:

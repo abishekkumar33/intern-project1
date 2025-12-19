@@ -2,188 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quiz Master | Register</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <title>Quiz Master - Register</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         body {
-            min-height: 100vh;
-            background: linear-gradient(120deg, #4e54c8, #8f94fb);
-            color: #fff;
-        }
-
-        /* Navbar */
-        .navbar {
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .back-btn {
-            padding: 10px 20px;
-            border-radius: 25px;
-            border: 2px solid #fff;
-            background: transparent;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .back-btn:hover {
-            background: #fff;
-            color: #4e54c8;
-        }
-
-        /* Register Card */
-        .register-container {
-            height: calc(100vh - 100px);
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
         }
 
-        .register-card {
-            background: #fff;
-            color: #333;
-            width: 400px;
-            padding: 35px;
-            border-radius: 14px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        .register-container {
+            background: #ffffff;
+            padding: 25px;
+            width: 350px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        .register-card h2 {
+        h2 {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
-        .register-card p {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 25px;
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
         }
 
-        .input-group {
-            margin-bottom: 14px;
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
 
-        .input-group label {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .input-group input {
+        button {
             width: 100%;
             padding: 10px;
-            margin-top: 6px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #4e54c8;
-        }
-
-        .register-btn {
-            width: 100%;
-            padding: 12px;
-            margin-top: 12px;
-            border-radius: 25px;
+            margin-top: 20px;
+            background-color: #007bff;
+            color: white;
             border: none;
-            background: #4e54c8;
-            color: #fff;
-            font-size: 15px;
-            font-weight: 600;
+            border-radius: 5px;
             cursor: pointer;
         }
 
-        .register-btn:hover {
-            background: #3b40a4;
+        button:hover {
+            background-color: #0056b3;
         }
 
-        .extra {
+        .login-link {
             text-align: center;
             margin-top: 15px;
-            font-size: 13px;
         }
 
-        .extra a {
-            color: #4e54c8;
+        .login-link a {
             text-decoration: none;
-            font-weight: 600;
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 13px;
-            color: #e0e0e0;
-            margin-bottom: 15px;
+            color: #007bff;
         }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
-    <div class="navbar">
-        <div class="logo">Quiz Master</div>
-        <button class="back-btn" onclick="window.location.href='index.html'">Home</button>
+<div class="register-container">
+    <h2>Register</h2>
+
+    <form action="/register" method="POST">
+        
+        <label for="role">Role</label>
+        <select name="role" id="role" required>
+            <option value="">-- Select Role --</option>
+            <option value="student">Student</option>
+            <option value="staff">Staff</option>
+        </select>
+
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" required>
+
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" required>
+
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required>
+
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" name="confirm_password" id="confirm_password" required>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="login-link">
+        Already have an account? <a href="/login">Login</a>
     </div>
-
-    <!-- Register Section -->
-    <div class="register-container">
-        <div class="register-card">
-            <h2>Create Account</h2>
-            <p>Join Quiz Master and start your learning journey</p>
-
-            <form>
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <input type="text" placeholder="Enter your full name" required>
-                </div>
-
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" placeholder="Enter your email" required>
-                </div>
-
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" placeholder="Create a password" required>
-                </div>
-
-                <div class="input-group">
-                    <label>Confirm Password</label>
-                    <input type="password" placeholder="Re-enter password" required>
-                </div>
-
-                <button type="submit" class="register-btn">Register</button>
-            </form>
-
-            <div class="extra">
-                Already have an account?
-                <a href="login.html">Login</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer">
-        © 2025 Quiz Master | Learn • Practice • Succeed
-    </div>
+</div>
 
 </body>
 </html>
