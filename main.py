@@ -10,34 +10,38 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
-    admin_role = Role.query.filter_by(name = 'admin').first()
+
+    # ----- ROLES -----
+    admin_role = Role.query.filter_by(name='admin').first()
     if not admin_role:
-        admin_role = Role(name = 'admin')
+        admin_role = Role(name='admin')
         db.session.add(admin_role)
 
-    staff_role = Role.query.filter_by(name = 'staff').first()
+    staff_role = Role.query.filter_by(name='staff').first()
     if not staff_role:
-        staff_role = Role(name = 'staff')
+        staff_role = Role(name='staff')
         db.session.add(staff_role)
 
-    student_role = Role.query.filter_by(name = 'student').first()
+    student_role = Role.query.filter_by(name='student').first()
     if not student_role:
-        student_role = Role(name = 'student')
+        student_role = Role(name='student')
         db.session.add(student_role)
+
     db.session.commit()
 
-
-    admin_user = User.query.filter_by(username = 'QMA_ADMIN').first()
+    # ----- ADMIN USER -----
+    admin_user = User.query.filter_by(username='QMA_ADMIN').first()
     if not admin_user:
         admin_user = User(
-            username = 'QMA_ADMIN',
-            email = 'admin@qma.com',
-            password_hash = '123456',
-            roles = [admin_role]
+            username='QMA_ADMIN',
+            email='admin@qma.com',
+            password_hash=generate_password_hash('123456')
         )
-        
+        admin_user.roles.append(admin_role)
         db.session.add(admin_user)
-    db.session.commit()
+        db.session.commit()
+
+
 
 @app.route("/")
 def home():
@@ -49,59 +53,53 @@ def login():
         return redirect(url_for('home'))
     return render_template('login.html')
 
-@app.route('/register', methods = ['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        print('In post method')
         role = request.form.get('role')
         name = request.form.get('name')
         email = request.form.get('email')
         password = request.form.get('password')
-        confirm = request.form.get('confirm')
+        confirm = request.form.get('confirm_password')  # ✅ FIXED
 
-
-        if not (role and name and email and password and confirm):
+        if not all([role, name, email, password, confirm]):
             flash('Please fill out all required fields', 'warning')
             return redirect(url_for('register'))
-        if password != confirm:
-            flash('Password do not match', 'warning')
-            return redirect(url_for('register'))
-        
 
-        if User.query.filter_by(email = email).first():
+        if password != confirm:
+            flash('Passwords do not match', 'warning')
+            return redirect(url_for('register'))
+
+        if User.query.filter_by(email=email).first():
             flash('Email already registered', 'warning')
             return redirect(url_for('register'))
-        
-        print('From frontend read')
+
         hashed_pw = generate_password_hash(password)
-        new_user= User(username = name, email = email, password_hash = hashed_pw)
-        print(new_user)
+        new_user = User(
+            username=name,
+            email=email,
+            password_hash=hashed_pw
+        )
+
         db.session.add(new_user)
-        db.session.commit()
+        db.session.commit()  # user_id generated here
 
-
-        role_obj = Role.query.filter_by(name = role).first()
-        if not role_obj:
-            role_obj = Role(name = role)
-            db.session.add(role_obj)
-            db.session.commit()
+        role_obj = Role.query.filter_by(name=role).first()
         new_user.roles.append(role_obj)
-
+        db.session.commit()  # ✅ IMPORTANT
 
         if role == 'student':
-            profile = Student(user_id = new_user.user_id,
-                              flag = False)
-            
+            profile = Student(user_id=new_user.user_id, flag=False)
         else:
-            profile = Staff(user_id = new_user.user_id,
-                            flag = False)
+            profile = Staff(user_id=new_user.user_id, flag=False)
+
         db.session.add(profile)
         db.session.commit()
 
         flash('Registration successful! Please login.', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html')
 
+    return render_template('register.html')
 
 @app.route('/logout')
 def logout():

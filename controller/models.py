@@ -24,11 +24,17 @@ class UserRole(db.Model):
 
 class Staff(db.Model):
     __tablename__ = 'staff'
-    staff_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+
+    staff_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+    flag = db.Column(db.Boolean, default=False)  # ✅ ADD THIS
+
 
 class Student(db.Model):
     __tablename__ = 'student'
-    student_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+
+    student_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+    flag = db.Column(db.Boolean, default=False)
+
 

@@ -6,7 +6,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f4f6f8;
+            background: linear-gradient(135deg, #1d2671, #c33764);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -14,16 +14,19 @@
         }
 
         .register-container {
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
             padding: 25px;
-            width: 350px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 380px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
+            color: white;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 20px;
+            text-shadow: 0 0 10px magenta;
         }
 
         label {
@@ -37,22 +40,25 @@
             padding: 8px;
             margin-top: 5px;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            border: none;
+            outline: none;
+            background: rgba(255,255,255,0.9);
         }
 
         button {
             width: 100%;
             padding: 10px;
             margin-top: 20px;
-            background-color: #007bff;
+            background: linear-gradient(45deg, #ff512f, #dd2476);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
+            box-shadow: 0 0 15px #ff512f;
         }
 
         button:hover {
-            background-color: #0056b3;
+            box-shadow: 0 0 25px #ff512f;
         }
 
         .login-link {
@@ -61,8 +67,8 @@
         }
 
         .login-link a {
+            color: #00ffff;
             text-decoration: none;
-            color: #007bff;
         }
     </style>
 </head>
@@ -72,25 +78,24 @@
     <h2>Register</h2>
 
     <form action="/register" method="POST">
-        
-        <label for="role">Role</label>
-        <select name="role" id="role" required>
+        <label>Role</label>
+        <select name="role" required>
             <option value="">-- Select Role --</option>
             <option value="student">Student</option>
             <option value="staff">Staff</option>
         </select>
 
-        <label for="name">Name</label>
-        <input type="text" name="name" id="name" required>
+        <label>Name</label>
+        <input type="text" name="name" required>
 
-        <label for="email">Email</label>
-        <input type="email" name="email" id="email" required>
+        <label>Email</label>
+        <input type="email" name="email" required>
 
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password" required>
+        <label>Password</label>
+        <input type="password" name="password" required>
 
-        <label for="confirm_password">Confirm Password</label>
-        <input type="password" name="confirm_password" id="confirm_password" required>
+        <label>Confirm Password</label>
+        <input type="password" name="confirm_password" required>
 
         <button type="submit">Register</button>
     </form>
