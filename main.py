@@ -1,5 +1,6 @@
 from flask import Flask , render_template, session, redirect, request, url_for, flash
 from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 from controller.config import Config
 from controller.database import db
 from controller.models import *
@@ -47,11 +48,40 @@ with app.app_context():
 def home():
     return render_template('home.html')
 
-@app.route('/login', methods = ['GET', 'POST'])
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        return redirect(url_for('home'))
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user or not check_password_hash(user.password_hash, password):
+            flash('Invalid email or password', 'danger')
+            return redirect(url_for('login'))
+
+        # Get user role
+        role = user.roles[0].name  # admin / staff / student
+
+        # Store session
+        session['user_id'] = user.user_id
+        session['role'] = role
+        session['username'] = user.username
+
+
+        # Role-based redirect
+        if role == 'staff':
+            return redirect(url_for('staff_dashboard'))
+
+        elif role == 'student':
+            return redirect(url_for('student_dashboard'))  # create later
+
+        else:
+            return redirect(url_for('home'))
+
     return render_template('login.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -100,6 +130,19 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
+@app.route('/staff-dashboard')
+def staff_dashboard():
+    if 'user_id' not in session or session.get('role') != 'staff':
+        return redirect(url_for('login'))
+    return render_template('staff_dashboard.html')
+
+@app.route('/student-dashboard')
+def student_dashboard():
+    if 'user_id' not in session or session.get('role') != 'student':
+        return redirect(url_for('login'))
+    return render_template('student_dashboard.html')
+
 
 @app.route('/logout')
 def logout():

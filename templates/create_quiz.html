@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Quiz | Quiz Master</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1f2933, #111827);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 40px;
+            border-radius: 16px;
+            width: 420px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        label {
+            font-size: 16px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 15px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 14px;
+            width: 100%;
+            border-radius: 28px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(59, 130, 246, 0.45);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Create Quiz</h2>
+
+        <form action="/create-quiz" method="POST">
+
+            <label for="category">Select Quiz Category</label>
+            <select name="category" id="category" required>
+                <option value="">-- Select Category --</option>
+                <option value="aptitude">Aptitude</option>
+                <option value="programming">Programming</option>
+                <option value="reasoning">Logical Reasoning</option>
+                <option value="web">Web Technologies</option>
+                <option value="core">Core Subjects</option>
+            </select>
+
+            <button type="submit" class="btn">Continue</button>
+
+        </form>
+    </div>
+
+</body>
+</html>

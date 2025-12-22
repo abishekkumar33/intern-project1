@@ -37,4 +37,32 @@ class Student(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     flag = db.Column(db.Boolean, default=False)
 
+class Categories(db.Model):
+    __tablename__ = 'category'
+
+    category_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
+    category_name = db.Column(db.String(50), nullable = False)
+
+class Quizzes(db.Model):
+    __tablename__ = 'quizzes'
+
+    quiz_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.category_id'), nullable = False)
+    total_questions = db.Column(db.Integer)
+    time_limit = db.Column(db.Integer)
+
+class Questions(db.Model):
+    __tablename__ = 'questions'
+
+    question_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.quiz_id'), nullable = False)
+    question_text = db.Column(db.String(500), nullable = False)
+
+class Options(db.Model):
+    __tablename__ = 'options'
+
+    option_id = db.Column(db.Integer, primary_key = True)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'), nullable = False)
+    option_text = db.Column(db.String(255), nullable = False)
+    is_correct = db.Column(db.Boolean, default = False, nullable = False)
 
