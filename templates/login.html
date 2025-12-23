@@ -3,71 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <title>Quiz Master - Login</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background: linear-gradient(135deg, #1f2933, #111827);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: white;
         }
 
         .login-container {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            width: 350px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-            color: white;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            padding: 30px;
+            width: 360px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
         }
 
         h2 {
             text-align: center;
             margin-bottom: 20px;
-            text-shadow: 0 0 10px cyan;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
+            font-size: 24px;
         }
 
         input {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 5px;
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 8px;
             border: none;
             outline: none;
-            background: rgba(255,255,255,0.9);
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input::placeholder {
+            color: #555;
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            margin-top: 20px;
-            background: linear-gradient(45deg, #00f260, #0575e6);
+            padding: 12px;
+            margin-top: 22px;
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
             color: white;
             border: none;
             border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 0 15px #00f260;
         }
 
         button:hover {
-            box-shadow: 0 0 25px #00f260;
+            box-shadow: 0 6px 14px rgba(59, 130, 246, 0.45);
         }
 
         .register-link {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 18px;
+            font-size: 14px;
         }
 
         .register-link a {
-            color: cyan;
+            color: #60a5fa;
             text-decoration: none;
         }
     </style>
@@ -78,11 +80,19 @@
     <h2>Login</h2>
 
     <form action="/login" method="POST">
-        <label>Email</label>
-        <input type="email" name="email" required>
+        <input 
+            type="email" 
+            name="email" 
+            placeholder="Email"
+            required
+        >
 
-        <label>Password</label>
-        <input type="password" name="password" required>
+        <input 
+            type="password" 
+            name="password" 
+            placeholder="Password"
+            required
+        >
 
         <button type="submit">Login</button>
     </form>

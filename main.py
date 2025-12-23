@@ -143,6 +143,92 @@ def student_dashboard():
         return redirect(url_for('login'))
     return render_template('student_dashboard.html')
 
+@app.route('/create-quiz', methods=['GET', 'POST'])
+def create_quiz():
+    if 'user_id' not in session or session.get('role') != 'staff':
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        category_name = request.form.get('category')
+        time_limit = request.form.get('time_limit')
+
+        # Category
+        category = Categories.query.filter_by(category_name=category_name).first()
+        if not category:
+            category = Categories(category_name=category_name)
+            db.session.add(category)
+            db.session.commit()
+
+        # Create Quiz
+        quiz = Quizzes(
+            category_id=category.category_id,
+            time_limit=time_limit,
+            total_questions=0
+        )
+        db.session.add(quiz)
+        db.session.commit()
+
+        # store quiz_id in session
+        session['quiz_id'] = quiz.quiz_id
+
+        return redirect(url_for('add_questions'))
+
+    return render_template('create_quiz.html')
+
+@app.route('/add-questions', methods=['GET', 'POST'])
+def add_questions():
+    if 'quiz_id' not in session:
+        return redirect(url_for('staff_dashboard'))
+
+    if request.method == 'POST':
+        quiz_id = session['quiz_id']
+
+        questions = request.form.getlist('question[]')
+        opt1 = request.form.getlist('opt1[]')
+        opt2 = request.form.getlist('opt2[]')
+        opt3 = request.form.getlist('opt3[]')
+        opt4 = request.form.getlist('opt4[]')
+        correct = request.form.getlist('correct[]')
+
+        for i in range(len(questions)):
+            q = Questions(quiz_id=quiz_id, question_text=questions[i])
+            db.session.add(q)
+            db.session.commit()
+
+            options = [opt1[i], opt2[i], opt3[i], opt4[i]]
+
+            for idx, text in enumerate(options, start=1):
+                db.session.add(
+                    Options(
+                        question_id=q.question_id,
+                        option_text=text,
+                        is_correct=(str(idx) == correct[i])
+                    )
+                )
+
+            db.session.commit()
+
+        return redirect(url_for('finish_quiz'))
+
+    return render_template('add_questions.html')
+
+
+
+
+@app.route('/finish-quiz')
+def finish_quiz():
+    quiz_id = session.get('quiz_id')
+
+    total = Questions.query.filter_by(quiz_id=quiz_id).count()
+    quiz = Quizzes.query.get(quiz_id)
+    quiz.total_questions = total
+    db.session.commit()
+
+    session.pop('quiz_id')
+    flash('Quiz uploaded successfully!', 'success')
+
+    return redirect(url_for('staff_dashboard'))
+
 
 @app.route('/logout')
 def logout():

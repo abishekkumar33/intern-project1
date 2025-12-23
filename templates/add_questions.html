@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Add Questions | Quiz Master</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#1f2933,#111827);
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:40px;
+    color:#fff;
+}
+
+.container{
+    width:100%;
+    max-width:850px;
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(8px);
+    padding:35px;
+    border-radius:18px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.35);
+}
+
+h2{
+    text-align:center;
+    margin-bottom:25px;
+    color:#60a5fa;
+}
+
+.question-card{
+    background:rgba(255,255,255,0.08);
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:25px;
+}
+
+.question-card h4{
+    margin-bottom:15px;
+    color:#e5e7eb;
+}
+
+label{
+    display:block;
+    margin-top:12px;
+    margin-bottom:6px;
+    font-weight:600;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    outline:none;
+    font-size:14px;
+}
+
+.actions{
+    display:flex;
+    gap:15px;
+    margin-top:25px;
+}
+
+button{
+    padding:14px;
+    border-radius:28px;
+    border:none;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.2s ease;
+}
+
+.add-btn{
+    background:transparent;
+    border:2px dashed #60a5fa;
+    color:#60a5fa;
+}
+
+.add-btn:hover{
+    background:#60a5fa;
+    color:#000;
+}
+
+.submit-btn{
+    background:linear-gradient(90deg,#3b82f6,#2563eb);
+    color:#fff;
+}
+
+.submit-btn:hover{
+    box-shadow:0 6px 14px rgba(59,130,246,0.45);
+    transform:translateY(-2px);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Add Questions</h2>
+
+    <form method="POST" action="/add-questions">
+
+        <div id="questions-container">
+
+            <div class="question-card">
+                <h4>Question 1</h4>
+
+                <label>Question</label>
+                <input type="text" name="question[]" placeholder="Enter the question text" required>
+
+                <label>Option A</label>
+                <input type="text" name="opt1[]" placeholder="Enter option A" required>
+
+                <label>Option B</label>
+                <input type="text" name="opt2[]" placeholder="Enter option B" required>
+
+                <label>Option C</label>
+                <input type="text" name="opt3[]" placeholder="Enter option C" required>
+
+                <label>Option D</label>
+                <input type="text" name="opt4[]" placeholder="Enter option D" required>
+
+                <label>Correct Answer</label>
+                <select name="correct[]" required>
+                    <option value="">-- Select correct option --</option>
+                    <option value="1">Option A</option>
+                    <option value="2">Option B</option>
+                    <option value="3">Option C</option>
+                    <option value="4">Option D</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="actions">
+            <button type="button" class="add-btn" onclick="addQuestion()">
+                + Add Another Question
+            </button>
+
+            <button type="submit" class="submit-btn">
+                Submit Quiz
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+let count = 1;
+
+function addQuestion(){
+    count++;
+
+    const div = document.createElement('div');
+    div.classList.add('question-card');
+
+    div.innerHTML = `
+        <h4>Question ${count}</h4>
+
+        <label>Question</label>
+        <input type="text" name="question[]" placeholder="Enter the question text" required>
+
+        <label>Option A</label>
+        <input type="text" name="opt1[]" placeholder="Enter option A" required>
+
+        <label>Option B</label>
+        <input type="text" name="opt2[]" placeholder="Enter option B" required>
+
+        <label>Option C</label>
+        <input type="text" name="opt3[]" placeholder="Enter option C" required>
+
+        <label>Option D</label>
+        <input type="text" name="opt4[]" placeholder="Enter option D" required>
+
+        <label>Correct Answer</label>
+        <select name="correct[]" required>
+            <option value="">-- Select correct option --</option>
+            <option value="1">Option A</option>
+            <option value="2">Option B</option>
+            <option value="3">Option C</option>
+            <option value="4">Option D</option>
+        </select>
+    `;
+
+    document.getElementById('questions-container').appendChild(div);
+}
+</script>
+
+</body>
+</html>
