@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Results</title>
+<style>
+body{
+    background:#111827;
+    color:white;
+    padding:30px;
+    font-family:Segoe UI;
+}
+.card{
+    background:#1f2933;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:15px;
+}
+</style>
+</head>
+<body>
+
+<h2>Student Results</h2>
+
+{% for r,u_name,u_id in results %}
+<div class="card">
+<p>Name: {{ u_name }}</p>
+<p>User ID: {{ u_id }}</p>
+<p>Quiz ID: {{ r.quiz_id }}</p>
+<p>Score: {{ r.score }}/{{ r.total_questions }}</p>
+</div>
+{% endfor %}
+
+<button onclick="window.location.href='/staff-dashboard'">
+    Back to Dashboard
+</button>
+
+
+</body>
+</html>

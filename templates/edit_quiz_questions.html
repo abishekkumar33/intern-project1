@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Quiz | Quiz Master</title>
+
+<style>
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#1f2933,#111827);
+    padding:40px;
+    color:#fff;
+    font-family:'Segoe UI';
+}
+.container{
+    max-width:900px;
+    margin:auto;
+}
+h2{
+    text-align:center;
+    color:#60a5fa;
+    margin-bottom:30px;
+}
+.card{
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(8px);
+    padding:25px;
+    border-radius:16px;
+    margin-bottom:25px;
+}
+label{
+    font-weight:600;
+    display:block;
+    margin-top:12px;
+}
+input{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    margin-top:6px;
+}
+.option-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+}
+.save-btn{
+    width:100%;
+    padding:14px;
+    border-radius:28px;
+    border:none;
+    font-weight:600;
+    background:linear-gradient(90deg,#3b82f6,#2563eb);
+    color:#fff;
+    margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h2>Edit Quiz</h2>
+
+    <form method="POST">
+
+        {% for q in questions %}
+        <div class="card">
+            <label>Question</label>
+            <input type="text"
+                   name="question_{{ q.question_id }}"
+                   value="{{ q.question_text }}"
+                   required>
+
+            {% for opt in q.options %}
+            <div class="option-row">
+                <input type="radio"
+                       name="correct_{{ q.question_id }}"
+                       value="{{ opt.option_id }}"
+                       {% if opt.is_correct %}checked{% endif %}>
+
+                <input type="text"
+                       name="option_{{ opt.option_id }}"
+                       value="{{ opt.option_text }}"
+                       required>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="save-btn">Save Changes</button>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Results | Quiz Master</title>
+<style>
+body{
+    background:#111827;
+    color:white;
+    font-family:Segoe UI;
+    padding:30px;
+}
+.card{
+    background:#1f2933;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:15px;
+}
+</style>
+</head>
+<body>
+
+<h2>My Results</h2>
+
+{% if results %}
+    {% for r, q, u in results %}
+    <div class="card">
+        <p><b>Name:</b> {{ u.username }}</p>
+        <p><b>User ID:</b> {{ u.user_id }}</p>
+        <p><b>Quiz ID:</b> {{ q.quiz_id }}</p>
+        <p><b>Score:</b> {{ r.score }} / {{ r.total_questions }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No results found.</p>
+{% endif %}
+
+<button onclick="location.href='/student-dashboard'">
+    Back to Dashboard
+</button>
+
+</body>
+</html>

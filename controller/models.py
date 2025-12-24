@@ -55,9 +55,18 @@ class Quizzes(db.Model):
 class Questions(db.Model):
     __tablename__ = 'questions'
 
-    question_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
-    quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.quiz_id'), nullable = False)
-    question_text = db.Column(db.String(500), nullable = False)
+    question_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.quiz_id'), nullable=False)
+    question_text = db.Column(db.String(500), nullable=False)
+
+    options = db.relationship(
+        'Options',
+        backref='question',
+        cascade='all, delete',
+        lazy=True
+    )
+
+
 
 class Options(db.Model):
     __tablename__ = 'options'
@@ -67,3 +76,11 @@ class Options(db.Model):
     option_text = db.Column(db.String(255), nullable = False)
     is_correct = db.Column(db.Boolean, default = False, nullable = False)
 
+class Results(db.Model):
+    __tablename__ = 'results'
+
+    result_id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.student_id'), nullable=False)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.quiz_id'), nullable=False)
+    score = db.Column(db.Integer, nullable=False)
+    total_questions = db.Column(db.Integer, nullable=False)

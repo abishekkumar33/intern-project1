@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quizzes | Quiz Master</title>
+
+<style>
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#1f2933,#111827);
+    padding:40px;
+    color:#fff;
+    font-family:'Segoe UI';
+}
+.container{
+    max-width:900px;
+    margin:auto;
+}
+h2{
+    margin-bottom:25px;
+    color:#60a5fa;
+}
+.card{
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(8px);
+    padding:22px;
+    border-radius:14px;
+    margin-bottom:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.info p{
+    color:#cbd5e1;
+    margin-top:6px;
+}
+.btn{
+    padding:8px 18px;
+    border-radius:20px;
+    border:none;
+    font-weight:600;
+    cursor:pointer;
+}
+.edit{
+    background:#22c55e;
+    color:#000;
+}
+.delete{
+    background:#ef4444;
+    color:#fff;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h2>Category: {{ category.category_name }}</h2>
+
+    {% for quiz in quizzes %}
+    <div class="card">
+        <div class="info">
+            <h4>Quiz ID: {{ quiz.quiz_id }}</h4>
+            <p>Total Questions: {{ quiz.total_questions }}</p>
+            <p>Time Limit: {{ quiz.time_limit }} mins</p>
+        </div>
+
+        <div>
+            <a href="/edit-quiz/{{ quiz.quiz_id }}">
+                <button class="btn edit">Edit</button>
+            </a>
+
+            <a href="/delete-quiz/{{ quiz.quiz_id }}"
+                onclick="return confirm('Are you sure you want to delete this quiz?')">
+                <button class="btn delete">Delete</button>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</body>
+</html>

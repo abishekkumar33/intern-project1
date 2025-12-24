@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Student</title>
+
+<style>
+body{
+    background:linear-gradient(135deg,#1f2933,#111827);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#fff;
+    font-family:'Segoe UI';
+}
+.card{
+    background:rgba(255,255,255,0.06);
+    padding:30px;
+    border-radius:16px;
+    width:360px;
+}
+input,button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border-radius:22px;
+    border:none;
+}
+button{
+    background:#3b82f6;
+    color:white;
+    font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Edit Student</h2>
+
+    <form method="POST">
+        <input type="text" name="username" value="{{ user.username }}" required>
+        <input type="email" name="email" value="{{ user.email }}" required>
+
+        <button type="submit">Update</button>
+    </form>
+
+    <button onclick="location.href='/manage-students'">
+        Cancel
+    </button>
+</div>
+
+</body>
+</html>

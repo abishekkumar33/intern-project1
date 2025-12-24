@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Select Category</title>
+<style>
+body{
+    height:100vh;
+    background:linear-gradient(135deg,#1f2933,#111827);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#fff;
+    font-family:Segoe UI;
+}
+.card{
+    width:380px;
+    background:rgba(255,255,255,0.06);
+    padding:30px;
+    border-radius:16px;
+}
+h2{text-align:center;color:#60a5fa;}
+select,button{
+    width:100%;
+    padding:12px;
+    border-radius:25px;
+    border:none;
+    margin-top:15px;
+}
+button{
+    background:linear-gradient(90deg,#3b82f6,#2563eb);
+    color:white;
+    font-weight:600;
+}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>Select Category</h2>
+<form method="POST">
+<select name="category" required>
+<option value="">-- Select Category --</option>
+{% for c in categories %}
+<option value="{{ c.category_id }}">{{ c.category_name }}</option>
+{% endfor %}
+</select>
+<button type="submit">Next</button>
+</form>
+</div>
+</body>
+</html>

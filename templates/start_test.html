@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test</title>
+<style>
+body{
+    background:#111827;
+    color:white;
+    font-family:Segoe UI;
+    padding:30px;
+}
+.card{
+    background:#1f2933;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+</style>
+</head>
+<body>
+
+<form method="POST">
+{% for q in questions %}
+<div class="card">
+<p><b>{{ q.question_text }}</b></p>
+{% for opt in q.options %}
+<label>
+<input type="radio" name="{{ q.question_id }}" value="{{ opt.option_id }}" required>
+{{ opt.option_text }}
+</label><br>
+{% endfor %}
+</div>
+{% endfor %}
+<button type="submit">Submit Test</button>
+</form>
+
+</body>
+</html>
