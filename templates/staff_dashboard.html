@@ -28,6 +28,14 @@ body{
     z-index:1000;
 }
 
+.profile-circle img{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+
 .profile-circle{
     width:45px;
     height:45px;
@@ -42,6 +50,7 @@ body{
     cursor:pointer;
 }
 
+/* dropdown */
 .profile-menu{
     position:absolute;
     top:55px;
@@ -72,7 +81,6 @@ body{
     color:#cbd5e1;
     font-weight:600;
 }
-
 
 /* ===== CONTENT ===== */
 .container{
@@ -105,8 +113,16 @@ h2{
 <!-- PROFILE -->
 <div class="profile-container">
     <div class="profile-circle" onclick="toggleProfileMenu()">
+
+    {% if user.profile_pic %}
+        <img src="/static/profile/{{ user.profile_pic }}">
+    {% else %}
         {{ session['username'][0] | upper }}
+    {% endif %}
+
     </div>
+
+
     <div class="profile-menu" id="profileMenu">
         <a href="/profile">Profile</a>
         <a href="/logout">Logout</a>
@@ -130,12 +146,10 @@ h2{
         Student Results
     </div>
 
-    <!-- ✅ NEW OPTION -->
     <div class="card" onclick="location.href='/manage-students'">
         Manage Students
     </div>
 </div>
-
 
 <script>
 function toggleProfileMenu(){

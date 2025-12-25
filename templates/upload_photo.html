@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Upload Profile Photo</title>
+
+<style>
+body{
+    background:#111827;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    font-family:Segoe UI;
+}
+.card{
+    background:#1f2937;
+    padding:30px;
+    border-radius:16px;
+    width:360px;
+    text-align:center;
+}
+input,button{
+    width:100%;
+    padding:12px;
+    margin-top:12px;
+    border-radius:25px;
+    border:none;
+}
+button{
+    background:#3b82f6;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Upload Profile Photo</h2>
+
+    <!-- ✅ THIS IS THE FORM -->
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="photo" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <button onclick="location.href='/profile'">Cancel</button>
+</div>
+
+</body>
+</html>

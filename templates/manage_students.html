@@ -1,73 +1,130 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Manage Students</title>
+<title>Manage Students | Quiz Master</title>
 
 <style>
 body{
+    min-height:100vh;
     background:linear-gradient(135deg,#1f2933,#111827);
     color:#fff;
     font-family:'Segoe UI';
-    padding:30px;
+    padding:40px;
 }
-.card{
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h2{
+    color:#60a5fa;
+    margin-bottom:25px;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
     background:rgba(255,255,255,0.06);
-    padding:20px;
+    backdrop-filter:blur(8px);
     border-radius:14px;
-    margin-bottom:15px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+    overflow:hidden;
 }
-.info p{
-    margin:6px 0;
+
+th,td{
+    padding:14px;
+    text-align:left;
 }
-.btn{
-    padding:6px 14px;
-    border-radius:18px;
-    border:none;
+
+th{
+    background:rgba(255,255,255,0.08);
+}
+
+tr:hover{
+    background:rgba(255,255,255,0.08);
+}
+
+/* ACTION LINKS */
+.block{
+    color:#ef4444;
     font-weight:600;
-    cursor:pointer;
+    text-decoration:none;
 }
-.edit{
-    background:#22c55e;
-    color:#000;
+
+.unblock{
+    color:#22c55e;
+    font-weight:600;
+    text-decoration:none;
 }
-.delete{
-    background:#ef4444;
-    color:#fff;
+
+/* BUTTON */
+.back{
+    margin-top:25px;
+    display:block;
+    width:100%;
+    text-align:center;
+    padding:14px;
+    border-radius:25px;
+    background:#3b82f6;
+    color:white;
+    text-decoration:none;
+    font-weight:600;
+}
+.back:hover{
+    background:#2563eb;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Manage Students</h2>
+<div class="container">
 
-{% for s, u in students %}
-<div class="card">
-    <div class="info">
-        <p><b>Name:</b> {{ u.username }}</p>
-        <p><b>Email:</b> {{ u.email }}</p>
-        <p><b>User ID:</b> {{ u.user_id }}</p>
-    </div>
+    <h2>Manage Students</h2>
 
-    <div>
-        <a href="/edit-student/{{ u.user_id }}">
-            <button class="btn edit">Edit</button>
-        </a>
+    <table>
+        <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
 
-        <a href="/delete-student/{{ u.user_id }}"
-           onclick="return confirm('Are you sure you want to delete this student?')">
-            <button class="btn delete">Delete</button>
-        </a>
-    </div>
+        {% for s, u in students %}
+        <tr>
+            <td>{{ u.user_id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+
+            <td>
+                {% if s.flag %}
+                    <span style="color:#ef4444;font-weight:600;">Blocked</span>
+                {% else %}
+                    <span style="color:#22c55e;font-weight:600;">Active</span>
+                {% endif %}
+            </td>
+
+            <td>
+                {% if s.flag %}
+                    <a class="unblock" href="{{ url_for('unblock_student', student_id=s.student_id) }}">
+                        Unblock
+                    </a>
+                {% else %}
+                    <a class="block" href="{{ url_for('block_student', student_id=s.student_id) }}">
+                        Block
+                    </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Back Button -->
+    <a href="{{ url_for('staff_dashboard') }}" class="back">Back to Dashboard</a>
+
 </div>
-{% endfor %}
-
-<button onclick="location.href='/staff-dashboard'">
-    Back to Dashboard
-</button>
 
 </body>
 </html>

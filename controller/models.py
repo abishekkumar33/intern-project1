@@ -2,10 +2,12 @@ from controller.database import db
 
 class User(db.Model):
     __tablename__ = 'user'
-    user_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
-    username = db.Column(db.String(80), unique = True, nullable = False)
-    email = db.Column(db.String(120), unique = True, nullable = False)
-    password_hash = db.Column(db.String(128), nullable = False)
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    profile_pic = db.Column(db.String(255), default='default.png')   # ✅ ADD THIS
+
 
     roles = db.relationship('Role', secondary = 'user_role', backref = db.backref('users', lazy = True, uselist = False))
     student_details = db.relationship('Student', backref = 'user', lazy = True, uselist = False)

@@ -5,9 +5,13 @@ from controller.config import Config
 from controller.database import db
 from controller.models import *
 
+
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
+
+import os
+app.config['UPLOAD_FOLDER'] = 'static/profile'
 
 with app.app_context():
     db.create_all()
@@ -64,23 +68,29 @@ def login():
         # Get user role
         role = user.roles[0].name  # admin / staff / student
 
+        # 🔒 BLOCK CHECK — ONLY FOR STUDENTS
+        if role == 'student':
+            student = Student.query.filter_by(user_id=user.user_id).first()
+            if student and student.flag:
+                flash('Your account has been blocked. Contact staff.', 'danger')
+                return redirect(url_for('login'))
+
         # Store session
         session['user_id'] = user.user_id
         session['role'] = role
         session['username'] = user.username
 
-
-        # Role-based redirect
+        # Redirect based on role
         if role == 'staff':
             return redirect(url_for('staff_dashboard'))
-
         elif role == 'student':
-            return redirect(url_for('student_dashboard'))  # create later
-
+            return redirect(url_for('student_dashboard'))
         else:
             return redirect(url_for('home'))
 
     return render_template('login.html')
+
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -135,13 +145,25 @@ def register():
 def staff_dashboard():
     if 'user_id' not in session or session.get('role') != 'staff':
         return redirect(url_for('login'))
-    return render_template('staff_dashboard.html')
+
+    user = User.query.get(session['user_id'])
+    return render_template('staff_dashboard.html', user=user)
+
 
 @app.route('/student-dashboard')
 def student_dashboard():
     if 'user_id' not in session or session.get('role') != 'student':
         return redirect(url_for('login'))
-    return render_template('student_dashboard.html')
+
+    user = User.query.get(session['user_id'])
+    student = Student.query.filter_by(user_id=user.user_id).first()
+
+    return render_template('student_dashboard.html',
+                           user=user,
+                           student=student)
+
+
+
 
 @app.route('/create-quiz', methods=['GET', 'POST'])
 def create_quiz():
@@ -293,6 +315,8 @@ def edit_quiz(quiz_id):
     questions = Questions.query.filter_by(quiz_id=quiz_id).all()
 
     if request.method == 'POST':
+
+        # ---------- UPDATE EXISTING QUESTIONS ----------
         for q in questions:
             q.question_text = request.form.get(f'question_{q.question_id}')
             correct = request.form.get(f'correct_{q.question_id}')
@@ -302,11 +326,50 @@ def edit_quiz(quiz_id):
                 opt.is_correct = str(opt.option_id) == correct
 
         db.session.commit()
-        flash('Quiz updated successfully!', 'success')
 
-        return redirect(url_for('staff_dashboard'))  # ✅ STAFF DASHBOARD
+
+        # ---------- ADD NEW QUESTIONS ----------
+        i = 1
+        while True:
+            q_text = request.form.get(f'new_question_{i}')
+            if not q_text:
+                break
+
+            correct = request.form.get(f'new_correct_{i}')
+
+            new_q = Questions(quiz_id=quiz_id, question_text=q_text)
+            db.session.add(new_q)
+            db.session.commit()
+
+            options = [
+                request.form.get(f'new_opt1_{i}'),
+                request.form.get(f'new_opt2_{i}'),
+                request.form.get(f'new_opt3_{i}'),
+                request.form.get(f'new_opt4_{i}')
+            ]
+
+            for idx, text in enumerate(options, start=1):
+                db.session.add(
+                    Options(
+                        question_id=new_q.question_id,
+                        option_text=text,
+                        is_correct=(str(idx) == correct)
+                    )
+                )
+
+            db.session.commit()
+            i += 1
+
+
+        # ---------- UPDATE TOTAL QUESTION COUNT ----------
+        quiz.total_questions = Questions.query.filter_by(quiz_id=quiz_id).count()
+        db.session.commit()
+
+        flash('Quiz updated successfully!', 'success')
+        return redirect(url_for('staff_dashboard'))
 
     return render_template('edit_quiz_questions.html', quiz=quiz, questions=questions)
+
 
 
 
@@ -315,6 +378,12 @@ def take_test():
     if 'user_id' not in session or session.get('role') != 'student':
         return redirect(url_for('login'))
 
+    student = Student.query.filter_by(user_id=session['user_id']).first()
+
+    if student.flag:
+        flash('Your account is blocked. You cannot take tests.', 'danger')
+        return redirect(url_for('student_dashboard'))
+
     categories = Categories.query.all()
 
     if request.method == 'POST':
@@ -322,6 +391,7 @@ def take_test():
         return redirect(url_for('select_quiz', category_id=category_id))
 
     return render_template('take_test.html', categories=categories)
+
 
 @app.route('/select-quiz/<int:category_id>')
 def select_quiz(category_id):
@@ -400,49 +470,131 @@ def manage_students():
 
     return render_template('manage_students.html', students=students)
 
-@app.route('/edit-student/<int:user_id>', methods=['GET', 'POST'])
-def edit_student(user_id):
+
+@app.route('/block-student/<int:student_id>')
+def block_student(student_id):
     if session.get('role') != 'staff':
         return redirect(url_for('login'))
 
-    user = User.query.get_or_404(user_id)
+    student = Student.query.get_or_404(student_id)
+    student.flag = True
+    db.session.commit()
+
+    flash('Student blocked successfully', 'warning')
+    return redirect(url_for('manage_students'))
+
+
+@app.route('/unblock-student/<int:student_id>')
+def unblock_student(student_id):
+    if session.get('role') != 'staff':
+        return redirect(url_for('login'))
+
+    student = Student.query.get_or_404(student_id)
+    student.flag = False
+    db.session.commit()
+
+    flash('Student unblocked successfully', 'success')
+    return redirect(url_for('manage_students'))
+
+
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
+
+    return render_template('profile.html', user=user)
+
+@app.route('/edit-profile', methods=['GET', 'POST'])
+def edit_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
 
     if request.method == 'POST':
         user.username = request.form.get('username')
         user.email = request.form.get('email')
         db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('profile'))
 
-        flash('Student updated successfully!', 'success')
-        return redirect(url_for('manage_students'))
+    return render_template('edit_profile.html', user=user)
 
-    return render_template('edit_student.html', user=user)
-
-@app.route('/delete-student/<int:user_id>')
-def delete_student(user_id):
-    if session.get('role') != 'staff':
+@app.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    student = Student.query.filter_by(user_id=user_id).first()
-    if not student:
-        flash('Student not found', 'danger')
-        return redirect(url_for('manage_students'))
+    user = User.query.get(session['user_id'])
 
-    # delete results
-    Results.query.filter_by(student_id=student.student_id).delete()
+    if request.method == 'POST':
+        old = request.form.get('old')
+        new = request.form.get('new')
+        confirm = request.form.get('confirm')
 
-    # delete student profile
-    db.session.delete(student)
+        if not check_password_hash(user.password_hash, old):
+            flash('Old password incorrect', 'danger')
+            return redirect(url_for('change_password'))
 
-    # delete user
-    user = User.query.get(user_id)
-    if user:
-        db.session.delete(user)
+        if new != confirm:
+            flash('Passwords do not match', 'danger')
+            return redirect(url_for('change_password'))
 
-    db.session.commit()
-    flash('Student deleted successfully!', 'success')
+        user.password_hash = generate_password_hash(new)
+        db.session.commit()
+        flash('Password updated successfully!', 'success')
+        return redirect(url_for('profile'))
 
-    return redirect(url_for('manage_students'))
+    return render_template('change_password.html')
 
+import os
+from werkzeug.utils import secure_filename
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/upload-photo', methods=['GET', 'POST'])
+def upload_photo():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
+
+    if request.method == 'POST':
+
+        if 'photo' not in request.files:
+            flash('No file selected', 'danger')
+            return redirect(request.url)
+
+        file = request.files['photo']
+
+        if file.filename == '':
+            flash('No file selected', 'danger')
+            return redirect(request.url)
+
+        if not allowed_file(file.filename):
+            flash('Only JPG and PNG allowed', 'danger')
+            return redirect(request.url)
+
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+        filename = secure_filename(f"user{user.user_id}.png")
+        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+        file.save(path)
+
+        user.profile_pic = filename
+        db.session.commit()
+
+        flash('Profile photo updated!', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('upload_photo.html')
 
 
 @app.route('/logout')

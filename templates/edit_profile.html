@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Profile</title>
+<style>
+body{background:#111827;display:flex;justify-content:center;align-items:center;height:100vh;color:white;font-family:Segoe UI;}
+.card{background:#1f2937;padding:30px;border-radius:16px;width:360px;}
+input,button{width:100%;padding:12px;margin-top:12px;border-radius:25px;border:none;}
+button{background:#3b82f6;color:white;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Edit Profile</h2>
+
+    <form method="POST">
+        <input type="text" name="username" value="{{ user.username }}" required>
+        <input type="email" name="email" value="{{ user.email }}" required>
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <button onclick="location.href='/profile'">Cancel</button>
+</div>
+
+</body>
+</html>
