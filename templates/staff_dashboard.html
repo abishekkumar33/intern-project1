@@ -20,21 +20,51 @@ body{
     padding:40px;
 }
 
+/* ===== NAV BAR ===== */
+.navbar{
+    width:100%;
+    background:rgba(255,255,255,0.07);
+    padding:14px 24px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:80px;
+    gap:16px;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:700;
+    color:#60a5fa;
+}
+
+.nav-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.nav-links{
+    list-style:none;
+    display:flex;
+    gap:20px;
+}
+
+.nav-links li a{
+    color:#fff;
+    text-decoration:none;
+    font-weight:500;
+}
+
+.nav-links li a:hover{
+    color:#60a5fa;
+}
+
 /* ===== PROFILE ===== */
 .profile-container{
-    position:fixed;
-    top:20px;
-    right:30px;
-    z-index:1000;
+    position:relative;
 }
-
-.profile-circle img{
-    width:100%;
-    height:100%;
-    border-radius:50%;
-    object-fit:cover;
-}
-
 
 .profile-circle{
     width:45px;
@@ -48,9 +78,16 @@ body{
     align-items:center;
     justify-content:center;
     cursor:pointer;
+    overflow:hidden;
 }
 
-/* dropdown */
+.profile-circle img{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    object-fit:cover;
+}
+
 .profile-menu{
     position:absolute;
     top:55px;
@@ -76,12 +113,6 @@ body{
     background:rgba(255,255,255,0.12);
 }
 
-.welcome-text{
-    margin-bottom:20px;
-    color:#cbd5e1;
-    font-weight:600;
-}
-
 /* ===== CONTENT ===== */
 .container{
     max-width:900px;
@@ -93,62 +124,136 @@ h2{
     color:#60a5fa;
 }
 
+.section-title{
+    margin-top:40px;
+    margin-bottom:10px;
+    color:#93c5fd;
+}
+
+.search-box{
+    width:100%;
+    padding:10px 14px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    margin-bottom:20px;
+}
+
+/* ===== CARDS ===== */
 .card{
     background:rgba(255,255,255,0.06);
     backdrop-filter:blur(8px);
     padding:25px;
     border-radius:16px;
     margin-bottom:20px;
-    cursor:pointer;
 }
 
 .card:hover{
     background:rgba(255,255,255,0.1);
+}
+
+.quiz-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.quiz-actions{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+}
+
+.btn{
+    padding:8px 14px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+}
+
+.edit-btn{
+    background:#3b82f6;
+    color:#fff;
+}
+
+.delete-btn{
+    background:#ef4444;
+    color:#fff;
 }
 </style>
 </head>
 
 <body>
 
-<!-- PROFILE -->
-<div class="profile-container">
-    <div class="profile-circle" onclick="toggleProfileMenu()">
+<!-- NAV BAR -->
+<nav class="navbar">
+    <div class="logo">Quiz Master</div>
 
-    {% if user.profile_pic %}
-        <img src="/static/profile/{{ user.profile_pic }}">
-    {% else %}
-        {{ session['username'][0] | upper }}
-    {% endif %}
+    <div class="nav-right">
+        <ul class="nav-links">
+            <li><a href="/create-quiz">Create Quiz</a></li>
+            <li><a href="/student-results">Student Results</a></li>
+            <li><a href="/manage-students">Manage Students</a></li>
+            <li><a href="/staff-summary">Summary</a></li>   <!-- ⭐ NEW -->
+        </ul>
 
+
+        <div class="profile-container">
+            <div class="profile-circle" onclick="toggleProfileMenu()">
+                {% if user.profile_pic %}
+                    <img src="/static/profile/{{ user.profile_pic }}">
+                {% else %}
+                    {{ session['username'][0] | upper }}
+                {% endif %}
+            </div>
+
+            <div class="profile-menu" id="profileMenu">
+                <a href="/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
     </div>
-
-
-    <div class="profile-menu" id="profileMenu">
-        <a href="/profile">Profile</a>
-        <a href="/logout">Logout</a>
-    </div>
-</div>
+</nav>
 
 <div class="container">
     <h2>Staff Dashboard</h2>
 
-    <h3 class="welcome-text">Welcome to, {{ session['username'] }}</h3>
+    <h3 class="welcome-text">Welcome, {{ session['username'] }}</h3>
 
-    <div class="card" onclick="location.href='/create-quiz'">
-        Create Quiz
-    </div>
+    <h3 class="section-title">Your Uploaded Quizzes</h3>
 
-    <div class="card" onclick="location.href='/view-quiz'">
-        View / Edit Quizzes
-    </div>
+    <!-- SEARCH -->
+    <input type="text" id="search" class="search-box" placeholder="Search quizzes...">
 
-    <div class="card" onclick="location.href='/student-results'">
-        Student Results
-    </div>
+    {% if quizzes and quizzes|length > 0 %}
+        {% for quiz, category in quizzes %}
+            <div class="card quiz-card" data-name="{{ category.category_name|lower }}">
+                <div class="quiz-header">
+                    <strong>{{ category.category_name }}</strong>
+                    <span>Quiz ID: {{ quiz.quiz_id }}</span>
+                </div>
 
-    <div class="card" onclick="location.href='/manage-students'">
-        Manage Students
-    </div>
+                <div>
+                    Total Questions: {{ quiz.total_questions if quiz.total_questions else 0 }}<br>
+                    Time Limit: {{ quiz.time_limit }} minutes
+                </div>
+
+                <div class="quiz-actions">
+                    <button class="btn edit-btn" onclick="location.href='/edit-quiz/{{ quiz.quiz_id }}'">
+                        Edit
+                    </button>
+
+                    <button class="btn delete-btn" onclick="location.href='/delete-quiz/{{ quiz.quiz_id }}'">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No quizzes uploaded yet.</p>
+    {% endif %}
 </div>
 
 <script>
@@ -162,6 +267,15 @@ window.onclick = function(e){
         document.getElementById("profileMenu").style.display = "none";
     }
 }
+
+/* SEARCH FILTER */
+document.getElementById("search").addEventListener("keyup", function(){
+    let value = this.value.toLowerCase();
+    document.querySelectorAll(".quiz-card").forEach(card=>{
+        let match = card.getAttribute("data-name");
+        card.style.display = match.includes(value) ? "block" : "none";
+    });
+});
 </script>
 
 </body>

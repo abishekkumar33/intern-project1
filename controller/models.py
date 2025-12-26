@@ -49,10 +49,17 @@ class Categories(db.Model):
 class Quizzes(db.Model):
     __tablename__ = 'quizzes'
 
-    quiz_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.category_id'), nullable = False)
+    quiz_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.category_id'), nullable=False)
     total_questions = db.Column(db.Integer)
     time_limit = db.Column(db.Integer)
+
+    # 🔥 NEW — who created the quiz
+    staff_id = db.Column(db.Integer, db.ForeignKey('staff.staff_id'), nullable=False)
+
+    # Optional relationship
+    staff = db.relationship('Staff', backref='quizzes')
+
 
 class Questions(db.Model):
     __tablename__ = 'questions'

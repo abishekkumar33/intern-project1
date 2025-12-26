@@ -20,21 +20,51 @@ body{
     padding:40px;
 }
 
+/* ===== NAV BAR ===== */
+.navbar{
+    width:100%;
+    background:rgba(255,255,255,0.07);
+    padding:14px 24px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:60px;
+    gap:16px;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:700;
+    color:#4ade80;
+}
+
+.nav-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.nav-links{
+    list-style:none;
+    display:flex;
+    gap:20px;
+}
+
+.nav-links li a{
+    color:#fff;
+    text-decoration:none;
+    font-weight:500;
+}
+
+.nav-links li a:hover{
+    color:#4ade80;
+}
+
 /* ===== PROFILE ===== */
 .profile-container{
-    position:fixed;
-    top:20px;
-    right:30px;
-    z-index:1000;
+    position:relative;
 }
-
-.profile-circle img{
-    width:100%;
-    height:100%;
-    border-radius:50%;
-    object-fit:cover;
-}
-
 
 .profile-circle{
     width:45px;
@@ -48,19 +78,24 @@ body{
     align-items:center;
     justify-content:center;
     cursor:pointer;
+    overflow:hidden;
 }
 
-/* dropdown */
+.profile-circle img{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    object-fit:cover;
+}
+
 .profile-menu{
     position:absolute;
     top:55px;
     right:0;
     background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(8px);
     border-radius:12px;
     min-width:140px;
     display:none;
-    overflow:hidden;
     box-shadow:0 8px 20px rgba(0,0,0,0.35);
 }
 
@@ -76,12 +111,6 @@ body{
     background:rgba(255,255,255,0.12);
 }
 
-.welcome-text{
-    margin-bottom:20px;
-    color:#cbd5e1;
-    font-weight:600;
-}
-
 /* ===== CONTENT ===== */
 .container{
     max-width:900px;
@@ -89,76 +118,134 @@ body{
 }
 
 h2{
-    margin-bottom:30px;
+    margin-bottom:20px;
     color:#60a5fa;
 }
 
+.section-title{
+    margin-top:30px;
+    margin-bottom:10px;
+    color:#93c5fd;
+}
+
+/* ===== QUIZ CARD ===== */
 .card{
     background:rgba(255,255,255,0.06);
-    backdrop-filter:blur(8px);
-    padding:25px;
-    border-radius:16px;
-    margin-bottom:20px;
+    padding:18px 20px;
+    border-radius:14px;
+    margin-bottom:14px;
     cursor:pointer;
 }
 
 .card:hover{
     background:rgba(255,255,255,0.1);
 }
+
+/* Badge */
+.badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:10px;
+    font-size:12px;
+    margin-top:6px;
+}
+
+.badge-available{
+    background:#22c55e;
+    color:#000;
+}
+
+.badge-completed{
+    background:#facc15;
+    color:#000;
+}
 </style>
 </head>
 
 <body>
 
-<!-- PROFILE -->
-<div class="profile-container">
-    <div class="profile-circle" onclick="toggleProfileMenu()">
+<!-- NAV BAR -->
+<!-- NAV BAR -->
+<nav class="navbar">
+    <div class="logo">Quiz Master</div>
 
-    {% if user.profile_pic %}
-        <img src="/static/profile/{{ user.profile_pic }}">
-    {% else %}
-        {{ session['username'][0] | upper }}
-    {% endif %}
+    <div class="nav-right">
+        <ul class="nav-links">
+        
+            {% if student.flag %}
+                <li><a style="opacity:.4; cursor:not-allowed;">Take Test (Blocked)</a></li>
+            {% else %}
+                <li><a href="/take-test">Take Test</a></li>
+            {% endif %}
 
+            <li><a href="/my-results">My Results</a></li>
+            <li><a href="/student-summary">Summary</a></li>   <!-- ⭐ NEW -->
+        </ul>
+
+        <!-- PROFILE -->
+        <div class="profile-container">
+            <div class="profile-circle" onclick="toggleProfileMenu()">
+                {% if user.profile_pic %}
+                    <img src="/static/profile/{{ user.profile_pic }}">
+                {% else %}
+                    {{ session['username'][0] | upper }}
+                {% endif %}
+            </div>
+
+            <div class="profile-menu" id="profileMenu">
+                <a href="/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
     </div>
+</nav>
 
-
-    <div class="profile-menu" id="profileMenu">
-        <a href="/profile">Profile</a>
-        <a href="/logout">Logout</a>
-    </div>
-</div>
 
 <div class="container">
     <h2>Student Dashboard</h2>
 
-    <h3 class="welcome-text">Welcome to, {{ session['username'] }}</h3>
+    <h3 class="welcome-text">Welcome, {{ session['username'] }}</h3>
 
-    {% if student.flag %}
-<div class="card" style="opacity:0.4; cursor:not-allowed;">
-    Take Test (Blocked)
-</div>
-{% else %}
-<div class="card" onclick="location.href='/take-test'">
-    Take Test
-</div>
-{% endif %}
+    <h3 class="section-title">Available Quizzes</h3>
 
+    {% if quizzes and quizzes|length > 0 %}
+        {% for quiz, category, status in quizzes %}
+            <div class="card"
+                 {% if not student.flag and status == 'available' %}
+                    onclick="location.href='/take-test/{{ quiz.quiz_id }}'"
+                 {% else %}
+                    style="cursor:not-allowed; opacity:0.6;"
+                 {% endif %}
+            >
+                <strong>{{ category.category_name }}</strong><br>
 
-    <div class="card" onclick="location.href='/my-results'">
-        My Results
-    </div>
+                Total Questions:
+                {{ quiz.total_questions if quiz.total_questions else 0 }}<br>
+
+                Time Limit:
+                {{ quiz.time_limit }} minutes<br>
+
+                {% if status == 'completed' %}
+                    <span class="badge badge-completed">Completed</span>
+                {% else %}
+                    <span class="badge badge-available">Available</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No quizzes available right now.</p>
+    {% endif %}
 </div>
 
 <script>
 function toggleProfileMenu(){
-    const menu = document.getElementById("profileMenu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
+    const menu=document.getElementById("profileMenu");
+    menu.style.display = (menu.style.display==="block")?"none":"block";
 }
 
-window.onclick = function(e){
+window.onclick=function(e){
     if(!e.target.closest('.profile-container')){
-        document.getElementById("profileMenu").style.display = "none";
+        document.getElementById("profileMenu").style.display="none";
     }
 }
 </script>

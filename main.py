@@ -146,8 +146,19 @@ def staff_dashboard():
     if 'user_id' not in session or session.get('role') != 'staff':
         return redirect(url_for('login'))
 
-    user = User.query.get(session['user_id'])
-    return render_template('staff_dashboard.html', user=user)
+    user_id = session['user_id']
+    user = User.query.get(user_id)
+    staff = Staff.query.filter_by(user_id=user_id).first()
+
+    quizzes = db.session.query(Quizzes, Categories).join(
+        Categories, Quizzes.category_id == Categories.category_id
+    ).filter(
+        Quizzes.staff_id == staff.staff_id
+    ).all()
+
+    return render_template('staff_dashboard.html', user=user, quizzes=quizzes)
+
+
 
 
 @app.route('/student-dashboard')
@@ -155,13 +166,28 @@ def student_dashboard():
     if 'user_id' not in session or session.get('role') != 'student':
         return redirect(url_for('login'))
 
-    user = User.query.get(session['user_id'])
-    student = Student.query.filter_by(user_id=user.user_id).first()
+    user_id = session['user_id']
+    user = User.query.get(user_id)
+    student = Student.query.filter_by(user_id=user_id).first()
 
-    return render_template('student_dashboard.html',
-                           user=user,
-                           student=student)
+    # quizzes already attempted by student
+    attempted_ids = db.session.query(Results.quiz_id).filter_by(
+        student_id=student.student_id
+    )
 
+    # AVAILABLE quizzes (not attempted yet)
+    quizzes = db.session.query(Quizzes, Categories).join(
+        Categories, Categories.category_id == Quizzes.category_id
+    ).filter(
+        ~Quizzes.quiz_id.in_(attempted_ids)
+    ).all()
+
+    return render_template(
+        'student_dashboard.html',
+        user=user,
+        student=student,
+        quizzes=quizzes
+    )
 
 
 
@@ -170,23 +196,28 @@ def create_quiz():
     if 'user_id' not in session or session.get('role') != 'staff':
         return redirect(url_for('login'))
 
+    # 🔹 Get the staff record linked to this user
+    staff = Staff.query.filter_by(user_id=session['user_id']).first()
+
     if request.method == 'POST':
         category_name = request.form.get('category')
         time_limit = request.form.get('time_limit')
 
-        # Category
+        # 🔹 Check / create category
         category = Categories.query.filter_by(category_name=category_name).first()
         if not category:
             category = Categories(category_name=category_name)
             db.session.add(category)
             db.session.commit()
 
-        # Create Quiz
+        # 🔹 Create Quiz + link to staff
         quiz = Quizzes(
             category_id=category.category_id,
             time_limit=time_limit,
-            total_questions=0
+            total_questions=0,
+            staff_id=staff.staff_id      # ⭐ IMPORTANT
         )
+
         db.session.add(quiz)
         db.session.commit()
 
@@ -196,6 +227,7 @@ def create_quiz():
         return redirect(url_for('add_questions'))
 
     return render_template('create_quiz.html')
+
 
 @app.route('/add-questions', methods=['GET', 'POST'])
 def add_questions():
@@ -249,19 +281,6 @@ def finish_quiz():
     flash('Quiz uploaded successfully!', 'success')
     return redirect(url_for('staff_dashboard'))  # ✅ STAFF DASHBOARD
 
-
-@app.route('/view-quiz', methods=['GET', 'POST'])
-def view_quiz():
-    if 'user_id' not in session or session.get('role') != 'staff':
-        return redirect(url_for('login'))
-
-    categories = Categories.query.all()
-
-    if request.method == 'POST':
-        category_id = request.form.get('category')
-        return redirect(url_for('list_quizzes', category_id=category_id))
-
-    return render_template('view_quiz.html', categories=categories)
 
 @app.route('/list-quizzes/<int:category_id>')
 def list_quizzes(category_id):
@@ -431,21 +450,75 @@ def start_test(quiz_id):
 
 @app.route('/my-results')
 def my_results():
-    if session.get('role') != 'student':
+    if 'user_id' not in session or session.get('role') != 'student':
         return redirect(url_for('login'))
 
-    user_id = session.get('user_id')
+    user_id = session['user_id']
+    student = Student.query.filter_by(user_id=user_id).first()
 
-    results = (
-        db.session.query(Results, Quizzes, User)
-        .join(Student, Results.student_id == Student.student_id)
-        .join(User, Student.user_id == User.user_id)
-        .join(Quizzes, Results.quiz_id == Quizzes.quiz_id)
-        .filter(User.user_id == user_id)
-        .all()
+    results = db.session.query(
+        Results, Quizzes, User, Categories
+    ).join(
+        Quizzes, Results.quiz_id == Quizzes.quiz_id
+    ).join(
+        User, User.user_id == student.user_id
+    ).join(
+        Categories, Categories.category_id == Quizzes.category_id
+    ).filter(
+        Results.student_id == student.student_id
+    ).all()
+
+    return render_template(
+        'my_results.html',
+        results=results
     )
 
-    return render_template('my_results.html', results=results)
+
+@app.route('/student-summary')
+def student_summary():
+    if 'user_id' not in session or session.get('role') != 'student':
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    user = User.query.get(user_id)
+    student = Student.query.filter_by(user_id=user_id).first()
+
+    rows = db.session.query(
+        Results,
+        Quizzes,
+        Categories
+    ).join(
+        Quizzes, Results.quiz_id == Quizzes.quiz_id
+    ).join(
+        Categories, Categories.category_id == Quizzes.category_id
+    ).filter(
+        Results.student_id == student.student_id
+    ).all()
+
+    quiz_names = []
+    attempted_counts = []
+
+    for result, quiz, category in rows:
+        quiz_names.append(category.category_name)
+
+        # 🔥 use score if total_questions doesn't exist
+        value = getattr(result, "total_questions", None)
+        if value is None:
+            value = getattr(result, "score", 0)
+
+        attempted_counts.append(value or 0)
+
+    print("QUIZ NAMES:", quiz_names)
+    print("ATTEMPTED COUNTS:", attempted_counts)
+
+    return render_template(
+        "student_summary.html",
+        quiz_names=quiz_names,
+        attempted_counts=attempted_counts,
+        user=user
+    )
+
+
 
 
 @app.route('/student-results')
@@ -495,6 +568,45 @@ def unblock_student(student_id):
 
     flash('Student unblocked successfully', 'success')
     return redirect(url_for('manage_students'))
+
+
+
+@app.route('/staff-summary')
+def staff_summary():
+    if 'user_id' not in session or session.get('role') != 'staff':
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    user = User.query.get(user_id)
+
+    staff = Staff.query.filter_by(user_id=user_id).first()
+
+    quizzes = db.session.query(
+        Quizzes.quiz_id,
+        Categories.category_name
+    ).join(
+        Categories, Categories.category_id == Quizzes.category_id
+    ).filter(
+        Quizzes.staff_id == staff.staff_id
+    ).all()
+
+    quiz_names = []
+    attempt_counts = []
+
+    for quiz_id, category_name in quizzes:
+        count = Results.query.filter_by(quiz_id=quiz_id).count()
+        quiz_names.append(category_name)
+        attempt_counts.append(count)
+
+    return render_template(
+        'staff_summary.html',
+        quiz_names=quiz_names,
+        attempt_counts=attempt_counts,
+        user=user
+    )
+
+
+
 
 
 @app.route('/profile')

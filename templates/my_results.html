@@ -2,31 +2,49 @@
 <html>
 <head>
 <title>My Results | Quiz Master</title>
+
 <style>
 body{
     background:#111827;
     color:white;
-    font-family:Segoe UI;
+    font-family:Segoe UI, Arial;
     padding:30px;
 }
+
 .card{
     background:#1f2933;
     padding:20px;
     border-radius:12px;
     margin-bottom:15px;
 }
+
+/* Search bar */
+.search-box{
+    width:100%;
+    padding:10px 14px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    margin:15px 0 25px 0;
+    font-size:15px;
+}
 </style>
 </head>
+
 <body>
 
 <h2>My Results</h2>
 
+<input type="text" id="search" class="search-box"
+       placeholder="Search by category name...">
+
 {% if results %}
-    {% for r, q, u in results %}
-    <div class="card">
+    {% for r, q, u, c in results %}
+    <div class="card result-card" data-category="{{ c.category_name|lower }}">
         <p><b>Name:</b> {{ u.username }}</p>
         <p><b>User ID:</b> {{ u.user_id }}</p>
         <p><b>Quiz ID:</b> {{ q.quiz_id }}</p>
+        <p><b>Category:</b> {{ c.category_name }}</p>
         <p><b>Score:</b> {{ r.score }} / {{ r.total_questions }}</p>
     </div>
     {% endfor %}
@@ -37,6 +55,17 @@ body{
 <button onclick="location.href='/student-dashboard'">
     Back to Dashboard
 </button>
+
+<script>
+/* ===== SEARCH FILTER ===== */
+document.getElementById("search").addEventListener("keyup", function(){
+    let value = this.value.toLowerCase();
+    document.querySelectorAll(".result-card").forEach(card=>{
+        let category = card.getAttribute("data-category");
+        card.style.display = category.includes(value) ? "block" : "none";
+    });
+});
+</script>
 
 </body>
 </html>
