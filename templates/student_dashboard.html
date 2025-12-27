@@ -226,10 +226,15 @@ h2{
                 {{ quiz.time_limit }} minutes<br>
 
                 {% if status == 'completed' %}
-                    <span class="badge badge-completed">Completed</span>
-                {% else %}
-                    <span class="badge badge-available">Available</span>
-                {% endif %}
+    <span class="badge badge-completed">Completed</span>
+{% else %}
+    <a class="badge badge-available" href="{{ url_for('take_test') }}">
+        Available
+    </a>
+{% endif %}
+
+
+
             </div>
         {% endfor %}
     {% else %}

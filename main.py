@@ -61,34 +61,44 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
+        # ---- USER NOT FOUND / WRONG PASSWORD ----
         if not user or not check_password_hash(user.password_hash, password):
             flash('Invalid email or password', 'danger')
             return redirect(url_for('login'))
 
-        # Get user role
-        role = user.roles[0].name  # admin / staff / student
+        # ---- HANDLE USERS WITH NO ROLE (PREVENT CRASH) ----
+        if not user.roles or len(user.roles) == 0:
+            flash('User does not have a role. Contact admin.', 'danger')
+            return redirect(url_for('login'))
 
-        # 🔒 BLOCK CHECK — ONLY FOR STUDENTS
+        # ---- GET ROLE ----
+        role = user.roles[0].name.lower()   # admin / staff / student
+
+        # ---- STUDENT BLOCK CHECK ----
         if role == 'student':
             student = Student.query.filter_by(user_id=user.user_id).first()
             if student and student.flag:
                 flash('Your account has been blocked. Contact staff.', 'danger')
                 return redirect(url_for('login'))
 
-        # Store session
+        # ---- SESSION ----
         session['user_id'] = user.user_id
         session['role'] = role
         session['username'] = user.username
 
-        # Redirect based on role
-        if role == 'staff':
+        # ---- REDIRECT BY ROLE ----
+        if role == 'admin':
+            return redirect(url_for('admin_dashboard'))
+        elif role == 'staff':
             return redirect(url_for('staff_dashboard'))
         elif role == 'student':
             return redirect(url_for('student_dashboard'))
         else:
-            return redirect(url_for('home'))
+            flash('Unknown role. Contact admin.', 'danger')
+            return redirect(url_for('login'))
 
     return render_template('login.html')
+
 
 
 
@@ -170,17 +180,20 @@ def student_dashboard():
     user = User.query.get(user_id)
     student = Student.query.filter_by(user_id=user_id).first()
 
-    # quizzes already attempted by student
-    attempted_ids = db.session.query(Results.quiz_id).filter_by(
+    attempted = db.session.query(Results.quiz_id).filter_by(
         student_id=student.student_id
-    )
-
-    # AVAILABLE quizzes (not attempted yet)
-    quizzes = db.session.query(Quizzes, Categories).join(
-        Categories, Categories.category_id == Quizzes.category_id
-    ).filter(
-        ~Quizzes.quiz_id.in_(attempted_ids)
     ).all()
+
+    attempted_ids = [a[0] for a in attempted]
+
+    records = db.session.query(Quizzes, Categories).join(
+        Categories, Categories.category_id == Quizzes.category_id
+    ).all()
+
+    quizzes = []
+    for quiz, category in records:
+        status = "completed" if quiz.quiz_id in attempted_ids else "available"
+        quizzes.append((quiz, category, status))
 
     return render_template(
         'student_dashboard.html',
@@ -189,6 +202,104 @@ def student_dashboard():
         quizzes=quizzes
     )
 
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    total_staff = Staff.query.count()
+    total_students = Student.query.count()
+    total_quizzes = Quizzes.query.count()
+    total_attempts = Results.query.count()
+
+    return render_template(
+        'admin_dashboard.html',
+        total_staff=total_staff,
+        total_students=total_students,
+        total_quizzes=total_quizzes,
+        total_attempts=total_attempts
+    )
+
+@app.route('/admin/manage-staff')
+def admin_manage_staff():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    staff_list = db.session.query(Staff, User).join(
+        User, User.user_id == Staff.user_id
+    ).all()
+
+    return render_template('admin_manage_staff.html', staff_list=staff_list)
+
+
+@app.route('/admin/block-staff/<int:staff_id>')
+def admin_block_staff(staff_id):
+    staff = Staff.query.get(staff_id)
+    staff.flag = True
+    db.session.commit()
+    flash("Staff blocked", "warning")
+    return redirect(url_for('admin_manage_staff'))
+
+
+@app.route('/admin/unblock-staff/<int:staff_id>')
+def admin_unblock_staff(staff_id):
+    staff = Staff.query.get(staff_id)
+    staff.flag = False
+    db.session.commit()
+    flash("Staff unblocked", "success")
+    return redirect(url_for('admin_manage_staff'))
+
+
+@app.route('/admin/manage-students')
+def admin_manage_students():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    student_list = db.session.query(Student, User).join(
+        User, User.user_id == Student.user_id
+    ).all()
+
+    return render_template('admin_manage_students.html', student_list=student_list)
+
+
+@app.route('/admin/block-student/<int:student_id>')
+def admin_block_student(student_id):
+    student = Student.query.get(student_id)
+    student.flag = True
+    db.session.commit()
+    flash("Student blocked", "warning")
+    return redirect(url_for('admin_manage_students'))
+
+
+@app.route('/admin/unblock-student/<int:student_id>')
+def admin_unblock_student(student_id):
+    student = Student.query.get(student_id)
+    student.flag = False
+    db.session.commit()
+    flash("Student unblocked", "success")
+    return redirect(url_for('admin_manage_students'))
+
+
+@app.route('/admin/summary')
+def admin_summary():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    data = db.session.query(
+        Categories.category_name,
+        db.func.count(Results.quiz_id)
+    ).join(
+        Quizzes, Quizzes.category_id == Categories.category_id
+    ).join(
+        Results, Results.quiz_id == Quizzes.quiz_id
+    ).group_by(
+        Categories.category_name
+    ).all()
+
+    labels = [row[0] for row in data]
+    counts = [row[1] for row in data]
+
+    return render_template('admin_summary.html', labels=labels, counts=counts)
 
 
 @app.route('/create-quiz', methods=['GET', 'POST'])
@@ -604,9 +715,6 @@ def staff_summary():
         attempt_counts=attempt_counts,
         user=user
     )
-
-
-
 
 
 @app.route('/profile')

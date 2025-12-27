@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Summary</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{background:#111827;color:#fff;font-family:Segoe UI;padding:40px;}
+.container{max-width:900px;margin:auto;}
+.chart-card{background:#1f2937;padding:25px;border-radius:14px;text-align:center;}
+.chart-card canvas{max-width:340px;max-height:340px;margin:auto;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Students Attempt Summary</h2>
+
+<div id="holder"
+     data-labels="{{ labels }}"
+     data-counts="{{ counts }}">
+</div>
+
+<div class="chart-card">
+<canvas id="pie"></canvas>
+
+<button onclick="location.href='/admin-dashboard'">
+⬅ Back
+</button>
+</div>
+
+</div>
+
+<script>
+const h=document.getElementById("holder");
+let labels=h.dataset.labels.replace(/[\[\]']/g,"").split(",").map(s=>s.trim());
+let counts=h.dataset.counts.replace(/[\[\]]/g,"").split(",").map(v=>parseInt(v)||0);
+
+new Chart(document.getElementById("pie"),{
+ type:"pie",
+ data:{labels:labels,datasets:[{data:counts}]}
+});
+</script>
+
+</body>
+</html>
